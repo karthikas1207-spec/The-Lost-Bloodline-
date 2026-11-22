@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Lost Bloodline</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  :root{--ink:#0b0716;--glow:#c77dff;--cyan:#5ee7ff;--karthi:#4aa3ff;--keerthi:#ff6fb5;--gold:#ffd66b}
+  html,body{margin:0;height:100%;overflow:hidden;background:#000;color:#f2ecff;font-family:Georgia,"Times New Roman",serif}
+  canvas{display:block}
+  #hud{position:fixed;inset:0;pointer-events:none}
+  #divider{position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--ink);box-shadow:0 0 12px var(--glow)}
+  #top{position:absolute;top:8px;left:50%;transform:translateX(-50%);text-align:center;background:rgba(11,7,22,.72);border:1px solid rgba(199,125,255,.45);padding:6px 18px;border-radius:10px;font-size:15px;line-height:1.4;max-width:70vw}
+  #top b{color:var(--gold)}
+  .pl{position:absolute;bottom:12px;width:50%;text-align:center}
+  #p1{left:0}#p2{right:0}
+  .pl .tag{display:inline-block;padding:3px 12px;border-radius:8px;font-size:14px;margin-bottom:6px;background:rgba(11,7,22,.75)}
+  #p1 .tag{border:1px solid var(--karthi);color:var(--karthi)}
+  #p2 .tag{border:1px solid var(--keerthi);color:var(--keerthi)}
+  .pl .msg{display:block;margin:0 auto;max-width:78%;background:rgba(11,7,22,.78);padding:8px 14px;border-radius:10px;font-size:16px;font-style:italic;min-height:1.2em;opacity:0;transition:opacity .3s}
+  .pl .msg.on{opacity:1}
+  .seq{display:block;margin:0 auto 6px;max-width:80%;background:rgba(11,7,22,.82);padding:4px 12px;border-radius:8px;font-size:15px}
+  .seq:empty{display:none}
+  #story{position:absolute;top:22%;left:50%;transform:translateX(-50%);max-width:min(560px,80vw);text-align:center;background:rgba(11,7,22,.88);border:1px solid var(--gold);padding:14px 22px;border-radius:12px;font-size:18px;line-height:1.5;opacity:0;transition:opacity .4s}
+  #story.on{opacity:1}
+  #center{position:absolute;top:56%;left:50%;transform:translateX(-50%);font-size:20px;color:var(--cyan);text-shadow:0 0 10px #000;text-align:center}
+  #overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(ellipse at center,rgba(60,20,110,.92),rgba(5,2,12,.97));padding:20px;box-sizing:border-box;z-index:5}
+  #overlay.on{display:flex}
+  #overlay h1{font-size:clamp(34px,7vw,72px);margin:0;letter-spacing:.04em;color:#fff;text-shadow:0 0 24px var(--glow),0 0 60px #7b2cbf}
+  #overlay .sub{font-style:italic;font-size:20px;margin:8px 0 22px;color:#d9c6ff}
+  #overlay .keys{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;font-size:16px;line-height:1.7}
+  #overlay .card{border:1px solid;border-radius:12px;padding:12px 20px;background:rgba(0,0,0,.35);text-align:left}
+  .k1{border-color:var(--karthi)!important}.k2{border-color:var(--keerthi)!important}
+  .k1 h3{color:var(--karthi)}.k2 h3{color:var(--keerthi)}
+  #overlay h3{margin:0 0 4px}
+  #overlay button{font:inherit;font-size:22px;padding:12px 38px;border-radius:12px;border:2px solid var(--glow);background:#2a0f4d;color:#fff;cursor:pointer;box-shadow:0 0 22px var(--glow)}
+  #overlay button:hover,#overlay button:focus-visible{background:#4a1d86;outline:2px solid var(--gold)}
+  #overlay p{max-width:640px;line-height:1.55}
+
+  html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+  .tc{display:none}
+  body.touch .tc{display:block}
+  body.touch .kb{display:none}
+  #touch{position:fixed;inset:0;pointer-events:none;z-index:3;display:none}
+  body.touch #touch{display:block}
+  .stick{position:absolute;bottom:5vh;width:min(30vh,150px);height:min(30vh,150px);border-radius:50%;pointer-events:auto;touch-action:none;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.35)}
+  .stick i{position:absolute;left:50%;top:50%;width:42%;height:42%;border-radius:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.35)}
+  .tbtn{position:absolute;pointer-events:auto;touch-action:none;width:min(20vh,84px);height:min(20vh,84px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.45)}
+  .tbtn:active{background:rgba(255,255,255,.35)}
+  #s1{left:3vw;border-color:var(--karthi)} #s2{right:3vw;border-color:var(--keerthi)}
+  #j1{right:calc(50% + 14px);bottom:6vh;border-color:var(--karthi)}
+  #j2{left:calc(50% + 14px);bottom:6vh;border-color:var(--keerthi)}
+  #sense{left:calc(50% + 14px);bottom:calc(6vh + min(20vh,84px) + 12px);border-color:var(--gold)}
+  #rotate{position:fixed;inset:0;z-index:9;background:#0b0716;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;font-size:22px;padding:30px}
+  @media (orientation:portrait){ body.touch #rotate{display:flex} }
+  body.touch .pl{bottom:auto;top:62px}
+  body.touch .seq{font-size:12px;padding:3px 8px}
+  body.touch #top{font-size:12px;padding:4px 10px;max-width:60vw}
+  body.touch .pl .msg{font-size:13px;padding:5px 10px}
+  body.touch #story{font-size:14px;top:30%;padding:10px 16px}
+  body.touch #center{font-size:16px;top:48%}
+  @media (max-height:520px){
+    #overlay h1{font-size:30px}
+    #overlay .sub{font-size:15px;margin:4px 0 10px}
+    #overlay .keys{gap:12px;margin-bottom:10px;font-size:13px;line-height:1.4}
+    #overlay .card{padding:6px 12px}
+    #overlay p{font-size:12px;margin:4px 0 10px;line-height:1.35}
+    #overlay button{font-size:18px;padding:8px 26px}
+  }
+
+  #wbtn{position:fixed;left:8px;top:8px;z-index:4;font:inherit;font-size:14px;padding:6px 14px;border-radius:10px;border:1px solid var(--gold);background:rgba(11,7,22,.78);color:var(--gold);cursor:pointer}
+  #wbtn:hover,#wbtn:focus-visible{background:rgba(60,30,100,.9);outline:2px solid var(--gold)}
+  #toast{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:9;background:rgba(40,20,70,.95);border:1px solid var(--gold);color:#fff;padding:10px 18px;border-radius:12px;font-size:16px;max-width:80vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+  #toast.on{opacity:1;transform:translateX(-50%)}
+  #overlay .btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  #overlay button.alt{background:transparent;border-color:var(--gold);box-shadow:none;color:var(--gold)}
+  #oRewards{color:var(--gold);margin:0 0 14px;min-height:1em}
+  #cine{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;box-sizing:border-box;color:#f4ecff;cursor:pointer;transition:background .6s}
+  #cine.on{display:flex}
+  #cTitle{font-size:clamp(26px,5.5vw,54px);margin-bottom:18px;color:#fff;text-shadow:0 0 22px var(--glow);letter-spacing:.03em}
+  #cTitle:empty{display:none}
+  #cText{font-size:clamp(18px,3vw,30px);line-height:1.6;max-width:760px;min-height:6em}
+  #cDots{margin-top:18px;letter-spacing:6px;color:var(--gold);font-size:14px}
+  #cHint{margin-top:10px;font-size:14px;opacity:.7}
+  #cSkip{position:absolute;top:14px;right:14px;font:inherit;font-size:14px;padding:6px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.35);color:#fff;cursor:pointer}
+  #wardrobe{position:fixed;inset:0;z-index:8;display:none;flex-direction:column;background:rgba(8,4,18,.96);padding:14px 18px;box-sizing:border-box;overflow:auto;touch-action:pan-y}
+  #wardrobe.on{display:flex}
+  #wardrobe h2{margin:0 0 8px;text-align:center;color:#fff;text-shadow:0 0 14px var(--glow);font-size:clamp(20px,4vw,34px)}
+  #wCols{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .wcol{flex:1 1 320px;max-width:560px}
+  .wcol h3{margin:4px 0 8px;text-align:center}
+  .wcol h3.karthi{color:var(--karthi)}.wcol h3.keerthi{color:var(--keerthi)}
+  .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+  .wcard{font:inherit;color:#f2ecff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+  .wcard.sel{border-color:var(--gold);background:rgba(255,214,107,.14)}
+  .wcard.lock{opacity:.5}
+  .wcard .wn{font-size:13px;font-weight:bold}
+  .wcard .wr{font-size:11px;opacity:.8;line-height:1.2}
+  #wDone{align-self:center;margin:12px 0 4px;font:inherit;font-size:20px;padding:10px 34px;border-radius:12px;border:2px solid var(--glow);background:#2a0f4d;color:#fff;cursor:pointer}
+  body.touch #wbtn{font-size:12px;padding:4px 10px}
+  body.touch #cText{font-size:18px;min-height:5em}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div id="divider"></div>
+  <div id="top"></div>
+  <div id="story"></div>
+  <div id="center"></div>
+  <div class="pl" id="p1"><span class="tag">Karthi</span><span class="seq" id="q1"></span><span class="msg" id="m1"></span></div>
+  <div class="pl" id="p2"><span class="tag">Keerthi</span><span class="seq" id="q2"></span><span class="msg" id="m2"></span></div>
+</div>
+
+<button id="wbtn">Outfits</button>
+<div id="toast"></div>
+<div id="cine"><button id="cSkip">Skip</button><div id="cTitle"></div><div id="cText"></div><div id="cDots"></div><div id="cHint"></div></div>
+<div id="wardrobe"><h2>Outfits</h2><div id="wCols"></div><button id="wDone">Done</button></div>
+<div id="touch">
+  <div class="stick" id="s1"><i></i></div>
+  <div class="tbtn" id="j1">Jump</div>
+  <div class="stick" id="s2"><i></i></div>
+  <div class="tbtn" id="j2">Jump</div>
+  <div class="tbtn" id="sense">Sense</div>
+</div>
+<div id="rotate">Turn your phone sideways to play.<br>Karthi plays on the left, Keerthi on the right.</div>
+
+<div id="overlay" class="on">
+  <h1>THE LOST BLOODLINE</h1>
+  <div class="sub">Two players. One family. A thousand secrets.</div>
+  <div class="keys">
+    <div class="card k1"><h3>Karthi (left side)</h3>
+      <span class="kb">Move: W A S D<br>Jump: Space<br></span><span class="tc">Left stick: move<br>Jump button next to the centre<br></span>Faster runner, longer jumps</div>
+    <div class="card k2"><h3>Keerthi (right side)</h3>
+      <span class="kb">Move: Arrow keys<br>Jump: Enter<br>Sense hidden clues: / (slash)</span><span class="tc">Right stick: move<br>Jump and Sense buttons next to the centre</span></div>
+  </div>
+  <p id="oText">Seven chapters. Neither of you can finish this alone. Open doors together, hold bridges for each other, revive each other when the ghost catches you, and don't believe every whisper you hear. Plays on a laptop with the keyboard or on a phone with touch controls. Finish chapters to unlock new outfits.</p>
+  <div id="oRewards"></div>
+  <div class="btns"><button id="startBtn">Start the adventure</button><button id="outfitBtn" class="alt">Outfits</button></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------
+   STORY TEXT
+---------------------------------------------------------------- */
+const CLUE_TEXT = [
+  /* Old House */
+  "A faded photograph: two little girls under a banyan tree. On the back: \"Sisters guard the light, together.\"",
+  "A letter from Grandmother: \"If you are reading this, the house has woken. Never walk the dark path alone.\"",
+  "Static, then a whisper from an old recording: \"The Shadow only wins when the family stops trusting each other.\"",
+  /* Forgotten Village */
+  "A child's drawing pinned to a door: a family holding hands. One figure has been scribbled out.",
+  "A village ledger: every house gave one candle to the Lamp of Origin. Only your family's page is blank.",
+  "A voice from an old well: \"The villagers did not vanish. They were hidden, to keep the Lamp safe.\"",
+  /* Dark Forest */
+  "A carved tree lists the names of your ancestors. It ends with two empty spaces. Yours.",
+  "A torn diary page: \"The village vanished the night we lit the Lamp of Origin.\"",
+  "A voice in the leaves: \"Any voice that tells you to doubt your sister belongs to the Shadow.\"",
+  /* Underground Tunnels */
+  "Wall paintings show a palace under the earth where the Lamp still burns.",
+  "A music box plays your lullaby. Inside is a key shaped like half a star.",
+  "Scratched into the wall: \"Two keys, two bearers. One cannot open what both must carry.\"",
+  /* Lost Palace */
+  "A portrait gallery: every queen holds a lamp. The last frame is empty, waiting for a face.",
+  "A royal decree: \"The Lamp must never be held by one hand alone.\"",
+  "Behind a tapestry: a letter from your great-grandmother, sorry for hiding the truth from her daughters.",
+  /* Hidden World (lake) */
+  "Words on a floating lily: \"The lake remembers everyone who crossed it beside someone they trust.\"",
+  "In the shallows, a silver locket: two photographs, two sisters, both smiling.",
+  "A note in a bottle: \"The Shadow is born from the first lie sisters tell each other.\"",
+  /* Family Sanctuary */
+  "A family tree glows on the wall. At its root is the Lamp, and two names, yours, side by side.",
+  "A recording of Grandmother: \"I am proud of you both. Now finish what we started.\"",
+  "Etched in stone: \"Two halves. One flame. Trust.\""
+];
+const CHAPTERS = [
+  {name:"The Old House", obj:"Stand on BOTH plates to open the door. Keerthi: sense hidden clues."},
+  {name:"The Forgotten Village", obj:"Step on the coloured plates in the order shown to open the gate. A watcher is following you."},
+  {name:"The Dark Forest", obj:"A ghost hunts one of you. Run, revive each other, reach the portal."},
+  {name:"The Underground Tunnels", obj:"One holds a plate so the other can cross the chasm, then swap. Mind the spikes."},
+  {name:"The Lost Palace", obj:"Gates open only while a plate is held. One holds, one passes, then swap. Dodge the shadows."},
+  {name:"The Hidden World", obj:"Hop the stones, ride the moving platform, then hold a plate so your partner can cross the bridge."},
+  {name:"The Family Sanctuary", obj:"Karthi reads the plate order, Keerthi steps. Then hold both glowing plates for 3 seconds, three times."}
+];
+
+/* ---------------------------------------------------------------
+   RENDERER / SCENE
+---------------------------------------------------------------- */
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setScissorTest(true);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const ambient = new THREE.AmbientLight(0x8a7bd8, 0.55);
+scene.add(ambient);
+let levelGroup = new THREE.Group();
+scene.add(levelGroup);
+
+const mat = (c, o) => new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:0.9, metalness:0.0}, o||{}));
+function setLayer(obj, n){ obj.traverse(o => o.layers.set(n)); }
+
+/* ---------------------------------------------------------------
+   INPUT
+---------------------------------------------------------------- */
+const keys = {};
+const justPressed = {};
+addEventListener("keydown", e => {
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","Slash","Enter"].includes(e.code)) e.preventDefault();
+  if (!keys[e.code]) justPressed[e.code] = true;
+  keys[e.code] = true;
+});
+addEventListener("keyup", e => { keys[e.code] = false; });
+addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+
+/* ---------------------------------------------------------------
+   PLAYERS
+---------------------------------------------------------------- */
+function makePlayer(name, color, speed, jump, ctl, layer){
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 1.3, 16), mat(color, {roughness:0.5}));
+  body.position.y = 0.75;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 18, 14), mat(0xffe0c8, {roughness:0.6}));
+  head.position.y = 1.75;
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.45, 18, 14, 0, Math.PI*2, 0, Math.PI*0.55), mat(0x1a0f10));
+  hair.position.y = 1.82;
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 8), mat(0xffd0b0));
+  nose.rotation.x = Math.PI/2; nose.position.set(0, 1.72, -0.45);
+  const accGroup = new THREE.Group();
+  g.add(body, head, hair, nose, accGroup);
+  const lamp = new THREE.PointLight(color, 1.1, 18);
+  lamp.position.set(0, 2.8, 0);
+  g.add(lamp);
+  scene.add(g);
+  const cam = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+  cam.layers.enable(layer);
+  return {name, g, lamp, cam, color, speed, jump, ctl, layer, body, hair, accGroup,
+          x:0, z:0, y:0, vy:0, facing:0, state:"ok", reviveT:0,
+          msgT:0, checkpoint:{x:0,z:0}, grounded:true};
+}
+const karthi  = makePlayer("Karthi",  0x4aa3ff, 7.2, 10.5,
+  {up:"KeyW",down:"KeyS",left:"KeyA",right:"KeyD",jump:"Space"}, 1);
+const keerthi = makePlayer("Keerthi", 0xff6fb5, 5.6, 8.2,
+  {up:"ArrowUp",down:"ArrowDown",left:"ArrowLeft",right:"ArrowRight",jump:"Enter",power:"Slash"}, 2);
+const players = [karthi, keerthi];
+
+/* ---------------------------------------------------------------
+   LEVEL STATE
+---------------------------------------------------------------- */
+let chapter = 0;
+let solids = [], clues = [], plates = [], spikes = [];
+let gates = [], hazards = [], movers = [], cpZones = [];
+let seq = null, finale = null;
+const STARTZ = [15, 15, 14, 15, 16, 17, 17];
+let door = null, bridge = null, portal = null, ghost = null;
+let floorTest = () => true;
+let found = new Set();
+let time = 0;
+let state = "menu";            // menu | play | end
+let darkT = 0, shakeT = 0, nextEvent = 30;
+let senseT = 0, senseCD = 0, senseRing = null;
+let portalT = 0;
+let ghostTargetT = 0;
+let rngSeed = 7;
+const rand = () => { rngSeed = (rngSeed*16807) % 2147483647; return (rngSeed-1)/2147483646; };
+
+function clearLevel(){
+  scene.remove(levelGroup);
+  levelGroup = new THREE.Group();
+  scene.add(levelGroup);
+  solids = []; clues = []; plates = []; spikes = [];
+  gates = []; hazards = []; movers = []; cpZones = [];
+  seq = null; finale = null;
+  door = bridge = portal = ghost = null;
+  senseRing = null;
+}
+
+function box(x, z, w, d, h, color, solid, y0){
+  y0 = y0 || 0;
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
+  m.position.set(x, y0 + h/2, z);
+  levelGroup.add(m);
+  const s = {x0:x-w/2, x1:x+w/2, z0:z-d/2, z1:z+d/2, h:y0+h, m, off:false};
+  if (solid !== false) solids.push(s);
+  return s;
+}
+function floorPlane(x0, x1, z0, z1, color){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(x1-x0, z1-z0), mat(color));
+  m.rotation.x = -Math.PI/2;
+  m.position.set((x0+x1)/2, 0, (z0+z1)/2);
+  levelGroup.add(m);
+  return m;
+}
+function walls(x0, x1, z0, z1, h, color){
+  box((x0+x1)/2, z0-0.5, x1-x0+2, 1, h, color);
+  box((x0+x1)/2, z1+0.5, x1-x0+2, 1, h, color);
+  box(x0-0.5, (z0+z1)/2, 1, z1-z0, h, color);
+  box(x1+0.5, (z0+z1)/2, 1, z1-z0, h, color);
+}
+function addClue(x, z, id, hidden){
+  if (found.has(id)) return;
+  const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.55),
+    mat(0xffd66b, {emissive:0xcc8800, emissiveIntensity:1.2, roughness:0.3}));
+  m.position.set(x, 1.4, z);
+  const l = new THREE.PointLight(0xffd66b, 0.9, 7);
+  m.add(l);
+  m.visible = !hidden;
+  levelGroup.add(m);
+  clues.push({x, z, id, hidden, got:false, m});
+}
+function addPlate(x, z, color){
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 28), mat(color, {emissive:color, emissiveIntensity:0.15}));
+  m.position.set(x, 0.1, z);
+  levelGroup.add(m);
+  plates.push({x, z, m, on:false, color});
+}
+function addPortal(x, z){
+  const g = new THREE.Group();
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.25, 12, 40), mat(0x5ee7ff, {emissive:0x2ab8d8, emissiveIntensity:1.4}));
+  ring.position.y = 2.4;
+  const core = new THREE.Mesh(new THREE.CircleGeometry(2.0, 32),
+    new THREE.MeshBasicMaterial({color:0x9b5cff, transparent:true, opacity:0.55, side:THREE.DoubleSide}));
+  core.position.y = 2.4;
+  const l = new THREE.PointLight(0x9b5cff, 1.6, 16); l.position.y = 2.4;
+  g.add(ring, core, l);
+  g.position.set(x, 0, z);
+  levelGroup.add(g);
+  portal = {x, z, g, ring, core};
+}
+function setMood(bg, fogDensity, ambColor, ambI){
+  scene.background = new THREE.Color(bg);
+  scene.fog = new THREE.FogExp2(bg, fogDensity);
+  ambient.color.set(ambColor);
+  ambient.userData.base = ambI;
+  ambient.userData.fog = fogDensity;
+}
+function addGhost(x, z, speed, opts){
+  opts = opts || {};
+  const col = opts.color || 0xcfe8ff;
+  const g = new THREE.Group();
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(0.9, 2.4, 16, 1, true),
+    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:0.6, side:THREE.DoubleSide}));
+  cone.position.y = 1.2; cone.rotation.x = Math.PI;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 12),
+    new THREE.MeshBasicMaterial({color:col, transparent:true, opacity:0.85}));
+  head.position.y = 2.6;
+  const eyeM = new THREE.MeshBasicMaterial({color:0x000000});
+  const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), eyeM); e1.position.set(-0.2, 2.65, 0.45);
+  const e2 = e1.clone(); e2.position.x = 0.2;
+  const gl = new THREE.PointLight(col, 1.4, 12); gl.position.y = 2;
+  g.add(cone, head, e1, e2, gl);
+  g.position.set(x, 0, z);
+  levelGroup.add(g);
+  ghost = {x, z, g, speed, target:0, active:false, grace:(opts.grace != null ? opts.grace : 4), nearest:!!opts.nearest};
+}
+
+/* ---------------------------------------------------------------
+   CHAPTER BUILDERS
+---------------------------------------------------------------- */
+function loadChapter(n){
+  chapter = n;
+  clearLevel();
+  portalT = 0; darkT = 0; shakeT = 0; nextEvent = 22 + rand()*16;
+  rngSeed = 7 + n*13;
+
+  [buildHouse, buildVillage, buildForest, buildTunnels, buildPalace, buildLake, buildSanctuary][n]();
+
+  players.forEach((p, i) => {
+    p.x = p.checkpoint.x = (i ? 3 : -3);
+    p.z = p.checkpoint.z = levelStartZ();
+    p.y = 0; p.vy = 0; p.state = "ok"; p.reviveT = 0;
+    syncPlayer(p);
+  });
+  updateTop(); updateHints();
+  say(karthi,  CHAPTERS[n].name, 3);
+  say(keerthi, CHAPTERS[n].name, 3);
+  story(INTROS[n]);
+  if (n === 2){
+    say(karthi,  "A voice whispers: \"Trust your sister.\"", 6);
+    say(keerthi, "A voice whispers: \"Don't trust Karthi.\"", 6);
+  }
+}
+function levelStartZ(){ return STARTZ[chapter]; }
+
+function buildHouse(){
+  setMood(0x120a1c, 0.022, 0xa08ad8, 0.6);
+  floorPlane(-20, 20, -24, 20, 0x3a2a3d);
+  walls(-20, 20, -24, 20, 5, 0x5a3d55);
+  // divider wall with a door gap
+  box(-11.25, -5.5, 17.5, 1, 5, 0x6a4562);
+  box( 11.25, -5.5, 17.5, 1, 5, 0x6a4562);
+  door = box(0, -5.5, 5, 1, 5, 0xa0642f);
+  // furniture
+  box(-9, 3, 4, 2, 1.4, 0x7a4b2a);      // sofa
+  box( 9, 4, 3, 3, 1.8, 0x6b3f2a);      // wardrobe
+  box( 0, 9, 2, 2, 0.8, 0x8b5a3c);      // low table (jumpable)
+  box(-15, 15, 3, 3, 2.2, 0x5b3a2a);    // bookshelf
+  box( 14, 16, 2, 4, 1.2, 0x7a4b2a);
+  box(-6, -14, 3, 3, 1.3, 0x6b3f2a);
+  box( 8, -10, 4, 2, 1.0, 0x7a4b2a);
+  box(-14, -18, 3, 2, 1.6, 0x5b3a2a);
+  // glowing windows
+  for (let i = -1; i <= 1; i++){
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(3, 2.4),
+      new THREE.MeshBasicMaterial({color:0x7bb0ff}));
+    w.position.set(i*10, 3, 19.9); w.rotation.y = Math.PI;
+    levelGroup.add(w);
+  }
+  const chand = new THREE.PointLight(0xffc27a, 1.2, 28); chand.position.set(0, 4.5, 6); levelGroup.add(chand);
+  const chand2 = new THREE.PointLight(0xffc27a, 1.0, 28); chand2.position.set(0, 4.5, -14); levelGroup.add(chand2);
+  addPlate(-15, 8, 0x4aa3ff);
+  addPlate( 15, 8, 0xff6fb5);
+  addClue(-12, 14, 0, false);
+  addClue( 13, 12, 1, false);
+  addClue( 16, -16, 2, true);
+  addPortal(0, -19);
+  floorTest = (x, z) => x > -20 && x < 20 && z > -24 && z < 20;
+}
+
+function buildForest(){
+  setMood(0x07041a, 0.03, 0x7a6cff, 0.55);
+  floorPlane(-30, 30, -62, 20, 0x142a2a);
+  walls(-30, 30, -62, 20, 6, 0x120a2a);
+  const keep = [[0,14,8],[0,-55,8],[-14,-10,4],[15,-28,4],[-18,-45,4]];
+  const tooNear = (x, z) => keep.some(k => Math.hypot(x-k[0], z-k[1]) < k[2]);
+  for (let i = 0; i < 130; i++){
+    const x = rand()*56 - 28, z = rand()*78 - 58;
+    if (tooNear(x, z)) continue;
+    const s = 1 + rand()*0.9;
+    const t = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35*s, 0.5*s, 3*s, 8), mat(0x2b1b33));
+    trunk.position.y = 1.5*s;
+    const top = new THREE.Mesh(new THREE.ConeGeometry(2*s, 5*s, 8), mat(0x1b3a4a, {emissive:0x0a1a30, emissiveIntensity:0.4}));
+    top.position.y = 5*s;
+    t.add(trunk, top); t.position.set(x, 0, z);
+    levelGroup.add(t);
+    solids.push({x0:x-0.7, x1:x+0.7, z0:z-0.7, z1:z+0.7, h:99, m:t, off:false});
+  }
+  // glowing mushrooms (decor)
+  const cols = [0xc77dff, 0x5ee7ff, 0xff6fb5];
+  for (let i = 0; i < 50; i++){
+    const x = rand()*56 - 28, z = rand()*78 - 58;
+    const c = cols[i % 3];
+    const m = new THREE.Group();
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.7, 8), mat(0xe9e0ff));
+    stem.position.y = 0.35;
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.55, 12, 8, 0, Math.PI*2, 0, Math.PI/2),
+      mat(c, {emissive:c, emissiveIntensity:1.1}));
+    cap.position.y = 0.7;
+    m.add(stem, cap); m.position.set(x, 0, z);
+    const sc = 0.8 + rand()*1.4; m.scale.set(sc, sc, sc);
+    levelGroup.add(m);
+  }
+  const moon = new THREE.DirectionalLight(0x8899ff, 0.5); moon.position.set(-10, 30, 10); levelGroup.add(moon);
+  addClue(-14, -10, 6, false);
+  addClue( 15, -28, 7, false);
+  addClue(-18, -45, 8, true);
+  addPortal(0, -55);
+  addGhost(0, -18, 4.0);
+  // Two Realities: Keerthi alone sees a shadow figure, Karthi alone sees a lantern
+  const shadow = new THREE.Group();
+  const sb = new THREE.Mesh(new THREE.ConeGeometry(1.1, 4, 12), new THREE.MeshBasicMaterial({color:0x000000}));
+  sb.position.y = 2;
+  const se1 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({color:0xff2222}));
+  se1.position.set(-0.25, 3.3, 0.5);
+  const se2 = se1.clone(); se2.position.x = 0.25;
+  shadow.add(sb, se1, se2); shadow.position.set(-6, 0, 2);
+  setLayer(shadow, 2); levelGroup.add(shadow);
+  const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10),
+    new THREE.MeshBasicMaterial({color:0xffe08a}));
+  lantern.position.set(6, 2, 2);
+  const ll = new THREE.PointLight(0xffe08a, 1.4, 12); lantern.add(ll);
+  setLayer(lantern, 1); levelGroup.add(lantern);
+  floorTest = (x, z) => x > -30 && x < 30 && z > -62 && z < 20;
+}
+
+function buildTunnels(){
+  setMood(0x05030c, 0.045, 0x6a5acd, 0.4);
+  // floors: near side, far side; chasm between z=-12 and z=-24
+  floorPlane(-6, 6, -12, 20, 0x2d2b3a);
+  floorPlane(-6, 6, -52, -24, 0x2d2b3a);
+  const pit = floorPlane(-6, 6, -24, -12, 0x000000); pit.position.y = -12;
+  // corridor walls
+  box(-6.5, 4, 1, 32, 6, 0x3a3550); box(-6.5, -38, 1, 28, 6, 0x3a3550);
+  box( 6.5, 4, 1, 32, 6, 0x3a3550); box( 6.5, -38, 1, 28, 6, 0x3a3550);
+  box(-6.5, -18, 1, 12, 6, 0x1a1a24); box(6.5, -18, 1, 12, 6, 0x1a1a24);
+  box(0, 20.5, 14, 1, 6, 0x3a3550); box(0, -52.5, 14, 1, 6, 0x3a3550);
+  // crates
+  box( 3, 12, 2, 2, 1.2, 0x5a4a3a);
+  box(-3, -2, 2, 2, 0.9, 0x5a4a3a);
+  // torches
+  [[-5.5,14],[5.5,0],[-5.5,-30],[5.5,-46]].forEach(p => {
+    const t = new THREE.PointLight(0xff9a4a, 1.4, 20); t.position.set(p[0], 3.5, p[1]); levelGroup.add(t);
+    const f = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), new THREE.MeshBasicMaterial({color:0xffa24a}));
+    f.position.copy(t.position); levelGroup.add(f);
+  });
+  // bridge (hidden until a plate is held)
+  const bm = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 12), mat(0x8fd9ff, {emissive:0x2a8fbf, emissiveIntensity:0.9, transparent:true, opacity:0.85}));
+  bm.position.set(0, -0.15, -18); bm.visible = false;
+  levelGroup.add(bm);
+  bridge = {m:bm, on:false, zhi:-12, zlo:-24, plates:[0, 1]};
+  addPlate(-3.5, 4, 0x4aa3ff);
+  addPlate( 3.5, -28, 0xff6fb5);
+  // spike tiles: 4 rows x 3 columns across z -34..-46
+  for (let r = 0; r < 4; r++){
+    for (let c = 0; c < 3; c++){
+      const x = -4 + c*4, z = -35 - r*3.4;
+      const tile = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.12, 3.0), mat(0x3a1520));
+      tile.position.set(x, 0.06, z);
+      const sp = new THREE.Group();
+      for (let i = 0; i < 4; i++){
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.0, 6), mat(0xd8d8e8, {metalness:0.6, roughness:0.3}));
+        cone.position.set((i%2 ? 0.8 : -0.8), 0.5, (i<2 ? -0.7 : 0.7));
+        sp.add(cone);
+      }
+      sp.position.set(x, 0, z); sp.visible = false;
+      levelGroup.add(tile, sp);
+      spikes.push({x, z, r, c, tile, sp, active:false, warn:false});
+    }
+  }
+  addClue( 4, 11.5, 9, false);
+  addClue(-4, -30, 10, false);
+  addClue( 0, -48, 11, true);
+  addPortal(0, -50);
+  floorTest = (x, z) => {
+    if (x < -6 || x > 6 || z > 20 || z < -52) return false;
+    if (z < -12 && z > -24) return !!(bridge && bridge.on);
+    return true;
+  };
+}
+
+
+/* ---------------------------------------------------------------
+   NEW MECHANICS + LEVELS
+---------------------------------------------------------------- */
+function addGate(x, z, w, d, h, color, plateIdx){
+  const s = box(x, z, w, d, h, color);
+  s.m.material.emissive = new THREE.Color(0x330a20);
+  const g = {s, plates:plateIdx, open:false, forceOpen:false};
+  gates.push(g);
+  return g;
+}
+function addShadow(ax, az, bx, bz, r, speed, phase){
+  const g = new THREE.Group();
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.1, 24), new THREE.MeshBasicMaterial({color:0x000000}));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(r, r+0.25, 28), new THREE.MeshBasicMaterial({color:0xff2a55, side:THREE.DoubleSide}));
+  ring.rotation.x = -Math.PI/2; ring.position.y = 0.08;
+  g.add(disc, ring);
+  levelGroup.add(g);
+  hazards.push({ax, az, bx, bz, r, speed, phase, x:ax, z:az, m:g});
+}
+function addMover(x, z, w, d, h, axis, min, max, speed, phase, color){
+  const s = box(x, z, w, d, h, color);
+  s.m.material.emissive = new THREE.Color(0x1a6a8a);
+  const c0 = min + (max-min)*(Math.sin(time*speed+phase)+1)/2;
+  s.mv = {axis, min, max, speed, phase, w, d, c:c0};
+  if (axis === "x"){ s.x0 = c0-w/2; s.x1 = c0+w/2; s.m.position.x = c0; }
+  else { s.z0 = c0-d/2; s.z1 = c0+d/2; s.m.position.z = c0; }
+  movers.push(s);
+  return s;
+}
+function torch(x, y, z, color, power, dist){
+  const t = new THREE.PointLight(color || 0xff9a4a, power || 1.3, dist || 20);
+  t.position.set(x, y, z); levelGroup.add(t);
+  const f = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), new THREE.MeshBasicMaterial({color:color || 0xffa24a}));
+  f.position.copy(t.position); levelGroup.add(f);
+}
+const SEQ_COLORS = [0xff4455, 0x4488ff, 0x44dd77, 0xffd23d];
+const SEQ_NAMES  = ["RED", "BLUE", "GREEN", "YELLOW"];
+function shuffled4(){
+  const o = [0,1,2,3];
+  for (let i = 3; i > 0; i--){ const j = Math.floor(rand()*(i+1)); const t = o[i]; o[i] = o[j]; o[j] = t; }
+  return o;
+}
+
+/* ---- Chapter 2: Forgotten Village (memory race + watcher) ---- */
+function buildVillage(){
+  setMood(0x1e1030, 0.026, 0xd7a0b8, 0.75);
+  floorPlane(-24, 24, -52, 20, 0x3a3038);
+  walls(-24, 24, -52, 20, 5, 0x2c2434);
+  [[-18,14,6,5,3.5],[18,15,6,5,3.5],[-20,-2,4,6,3],[20,-3,4,6,3],[0,-3,5,4,2.5],
+   [-6,11,3,2,1],[6,12,2,3,1.2],[-7,-14,4,2,2],[7,-14,4,2,2],
+   [-14,-30,3,3,2],[14,-36,3,3,2],[-8,-42,4,2,1.5]].forEach(h => box(h[0], h[1], h[2], h[3], h[4], 0x4a3a48));
+  box(-13.5, -18, 21, 1, 5, 0x3c3044);
+  box( 13.5, -18, 21, 1, 5, 0x3c3044);
+  const gate = addGate(0, -18, 6, 1, 5, 0x8b5a2b, []);
+  [[-10,2],[10,2],[0,-14],[0,-36],[-14,-26],[14,-30]].forEach(t => torch(t[0], 3, t[1]));
+  const pos = [[-12,6],[12,6],[-12,-8],[12,-8]];
+  pos.forEach((q, i) => addPlate(q[0], q[1], SEQ_COLORS[i]));
+  seq = {order:shuffled4(), pos:0, done:false, gate, colors:SEQ_COLORS, names:SEQ_NAMES, karthiOnly:false};
+  addClue(-16, 8, 3, false);
+  addClue( 19, 8, 4, false);
+  addClue( 20, -40, 5, true);
+  addPortal(0, -46);
+  addGhost(0, -10, 3.0, {nearest:true, color:0xffcf9f, grace:7});
+  floorTest = (x, z) => x > -24 && x < 24 && z > -52 && z < 20;
+}
+
+/* ---- Chapter 5: Lost Palace (relay gates + patrolling shadows) ---- */
+function buildPalace(){
+  setMood(0x120818, 0.024, 0xd0a8ff, 0.75);
+  floorPlane(-8, 8, -62, 20, 0x3a2f45);
+  walls(-8, 8, -62, 20, 7, 0x4d3a63);
+  for (let z = 14; z >= -58; z -= 12){
+    if (Math.abs(z+2) < 1.5 || Math.abs(z+32) < 1.5) continue;
+    box(-7, z, 1.2, 1.2, 6, 0xc9b6e8, false);
+    box( 7, z, 1.2, 1.2, 6, 0xc9b6e8, false);
+  }
+  addGate(0,  -2, 16, 1, 6, 0x8b3a62, [0, 1]);
+  addGate(0, -32, 16, 1, 6, 0x8b3a62, [2, 3]);
+  addPlate(-5,  10, 0x4aa3ff);
+  addPlate( 5,  -8, 0xff6fb5);
+  addPlate(-5, -24, 0x4aa3ff);
+  addPlate( 5, -40, 0xff6fb5);
+  addShadow(-7, -10,  7, -10, 1.3, 1.1, 0);
+  addShadow( 7, -16, -7, -16, 1.0, 1.6, 2);
+  addShadow(-7, -22,  7, -22, 1.4, 1.0, 4);
+  addShadow(-7, -47,  7, -47, 1.3, 1.3, 1);
+  addShadow( 7, -52, -7, -52, 1.3, 1.5, 3);
+  [[-6,12],[6,0],[-6,-14],[6,-28],[-6,-44],[6,-56]].forEach(t => torch(t[0], 3.5, t[1], 0xb48cff, 1.5, 22));
+  box(0, -61, 6, 1.5, 2.2, 0xffd66b, false);
+  addClue( 5, 14, 12, false);
+  addClue( 5, -27, 13, false);
+  addClue(-5, -55, 14, true);
+  addPortal(0, -58);
+  floorTest = (x, z) => x > -8 && x < 8 && z > -62 && z < 20;
+}
+
+/* ---- Chapter 6: Hidden World (stones, moving platform, bridge) ---- */
+function buildLake(){
+  setMood(0x04121c, 0.03, 0x5ec6ff, 0.6);
+  const shore = 0x24424a;
+  floorPlane(-12, 12, 8, 20, shore);
+  floorPlane(-9, 9, -28, -22, shore);
+  floorPlane(-12, 12, -52, -38, shore);
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(40, 90),
+    new THREE.MeshStandardMaterial({color:0x0a4a6a, emissive:0x0a3a5a, emissiveIntensity:0.6, transparent:true, opacity:0.8, roughness:0.3}));
+  water.rotation.x = -Math.PI/2; water.position.set(0, -0.4, -16);
+  levelGroup.add(water);
+  walls(-14, 14, -54, 22, 3, 0x0a2a3a);
+  [[-5,5],[-1,1],[4,-2.5],[8,-6],[-6,-16],[-1,-19.5]].forEach(s => box(s[0], s[1], 3, 3, 0.5, 0x6c8f9b));
+  addMover(0, -11, 4, 4, 0.5, "x", -7, 7, 1.0, 0, 0x7fb0c0);
+  for (let i = 0; i < 28; i++){
+    const o = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), new THREE.MeshBasicMaterial({color:i%2 ? 0x5ee7ff : 0xc77dff}));
+    o.position.set(rand()*24-12, 0.4 + rand()*1.8, rand()*70-52);
+    levelGroup.add(o);
+  }
+  [[-8,14],[8,-24],[-8,-44],[8,-44]].forEach(t => torch(t[0], 3, t[1], 0x5ee7ff, 1.4, 22));
+  addPlate(-5, -25, 0x4aa3ff);
+  addPlate( 5, -42, 0xff6fb5);
+  const bm = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 10), mat(0x8fd9ff, {emissive:0x2a8fbf, emissiveIntensity:0.9, transparent:true, opacity:0.85}));
+  bm.position.set(0, -0.15, -33); bm.visible = false;
+  levelGroup.add(bm);
+  bridge = {m:bm, on:false, zhi:-28, zlo:-38, plates:[0, 1]};
+  cpZones.push({x0:-9, x1:9, z0:-28, z1:-22, cx:0, cz:-25});
+  cpZones.push({x0:-12, x1:12, z0:-52, z1:-38, cx:0, cz:-41});
+  addClue( 9, 14, 15, false);
+  addClue( 5, -25, 16, false);
+  addClue(-9, -46, 17, true);
+  addPortal(0, -48);
+  floorTest = (x, z) => {
+    if (x > -12 && x < 12 && ((z > 8 && z < 20) || (z > -52 && z < -38))) return true;
+    if (x > -9 && x < 9 && z > -28 && z < -22) return true;
+    if (x > -3 && x < 3 && z < bridge.zhi && z > bridge.zlo) return bridge.on;
+    return false;
+  };
+}
+
+/* ---- Chapter 7: Family Sanctuary (colour code + final stand) ---- */
+function buildSanctuary(){
+  setMood(0x160a2a, 0.018, 0xffe6b0, 0.75);
+  floorPlane(-18, 18, -22, 22, 0x3b2f55);
+  walls(-18, 18, -22, 22, 7, 0x5b4a7a);
+  const pc = [0xc77dff, 0x5ee7ff, 0xff6fb5, 0xffd66b, 0x7bff9e];
+  for (let i = 0; i < 5; i++){
+    const f = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.2), new THREE.MeshBasicMaterial({color:pc[i]}));
+    f.position.set(-12 + i*6, 4, -21.9);
+    levelGroup.add(f);
+  }
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 1.2, 20), mat(0xcab6ff, {emissive:0x5a3a9a, emissiveIntensity:0.6}));
+  base.position.set(0, 0.6, -19); levelGroup.add(base);
+  const flame = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 12), new THREE.MeshBasicMaterial({color:0xffe08a}));
+  flame.position.set(0, 2.2, -19); levelGroup.add(flame);
+  const fl = new THREE.PointLight(0xffd66b, 0.6, 30); fl.position.set(0, 3, -19); levelGroup.add(fl);
+  box(-5, 0, 1.5, 1.5, 5, 0xcab6ff);
+  box( 5, 0, 1.5, 1.5, 5, 0xcab6ff);
+  [[-14,10],[14,10],[-14,-10],[14,-10]].forEach(t => torch(t[0], 3.5, t[1], 0xffd66b, 1.2, 22));
+  const pos = [[-11,8],[11,8],[-11,-6],[11,-6]];
+  pos.forEach((q, i) => addPlate(q[0], q[1], SEQ_COLORS[i]));
+  addPlate(0, 0, 0x4aa3ff);  addPlate(0, 0, 0xff6fb5);
+  plates[4].disabled = true; plates[5].disabled = true;
+  seq = {order:shuffled4(), pos:0, done:false, gate:null, colors:SEQ_COLORS, names:SEQ_NAMES, karthiOnly:true, onDone:startFinale};
+  finale = {phase:1, n:0, hold:0, light:fl, flame,
+            spots:[[[-12,12],[12,12]], [[-12,-8],[12,-8]], [[0,15],[0,-8]]]};
+  addClue(-14, 15, 18, false);
+  addClue( 14, 15, 19, false);
+  addClue(-14, -16, 20, true);
+  addPortal(0, -14);
+  portal.locked = true; portal.g.visible = false;
+  floorTest = (x, z) => x > -18 && x < 18 && z > -22 && z < 22;
+}
+function startFinale(){
+  finale.phase = 2;
+  [0,1,2,3].forEach(i => { plates[i].disabled = true; });
+  const sp = finale.spots[0];
+  [4,5].forEach((i, k) => {
+    const pl = plates[i]; pl.disabled = false;
+    pl.x = sp[k][0]; pl.z = sp[k][1];
+    pl.m.position.x = pl.x; pl.m.position.z = pl.z;
+  });
+  addGhost(0, -10, 3.2, {nearest:true, color:0xb48cff, grace:3});
+  say(karthi,  "The Shadow awakens! Hold both glowing plates for 3 seconds.", 6);
+  say(keerthi, "The Shadow awakens! Hold both glowing plates for 3 seconds.", 6);
+}
+
+/* ---------------------------------------------------------------
+   HUD HELPERS
+---------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+function say(p, text, sec){
+  const el = $(p === karthi ? "m1" : "m2");
+  el.textContent = text; el.classList.add("on");
+  p.msgT = sec || 4;
+}
+let storyT = 0;
+function story(text){
+  const el = $("story"); el.textContent = text; el.classList.add("on"); storyT = 7;
+}
+function updateTop(){
+  $("top").innerHTML = "<b>Chapter " + (chapter+1) + ": " + CHAPTERS[chapter].name + "</b> &nbsp; Clues " + found.size + "/" + CLUE_TEXT.length + "<br>" + CHAPTERS[chapter].obj;
+}
+let cmsg = "", lastCmsg = "";
+function center(text){ cmsg = text || ""; }
+function frame(dt){
+  cmsg = "";
+  update(dt);
+  if (cmsg !== lastCmsg){ $("center").textContent = cmsg; lastCmsg = cmsg; }
+}
+let hintCache = ["", ""];
+function setHint(i, html){
+  if (hintCache[i] !== html){ hintCache[i] = html; $(i ? "q2" : "q1").innerHTML = html; }
+}
+function updateHints(){
+  if (!seq || seq.done){ setHint(0, ""); setHint(1, ""); return; }
+  const html = seq.order.map((idx, k) => {
+    const c = "#" + seq.colors[idx].toString(16).padStart(6, "0");
+    return '<span style="color:' + c + ';opacity:' + (k < seq.pos ? 0.35 : 1) + '">' + seq.names[idx] + '</span>';
+  }).join(" &rarr; ");
+  if (seq.karthiOnly){
+    setHint(0, "Order (tell Keerthi!): " + html);
+    setHint(1, "Only Karthi can read the plate order. Ask him!");
+  } else {
+    setHint(0, "Memory Race: " + html);
+    setHint(1, "Memory Race: " + html);
+  }
+}
+
+
+/* ---------------------------------------------------------------
+   PHYSICS HELPERS
+---------------------------------------------------------------- */
+const RADIUS = 0.45;
+function blocked(p, nx, nz){
+  for (const s of solids){
+    if (s.off) continue;
+    if (p.y >= s.h - 0.05) continue;
+    if (nx+RADIUS > s.x0 && nx-RADIUS < s.x1 && nz+RADIUS > s.z0 && nz-RADIUS < s.z1) return true;
+  }
+  return false;
+}
+function groundHeight(p){
+  let gh = floorTest(p.x, p.z) ? 0 : -100;
+  for (const s of solids){
+    if (s.off || s.h > 50) continue;
+    if (p.x > s.x0 && p.x < s.x1 && p.z > s.z0 && p.z < s.z1 && p.y >= s.h - 0.3) gh = Math.max(gh, s.h);
+  }
+  return gh;
+}
+function syncPlayer(p){
+  p.g.position.set(p.x, p.y, p.z);
+  p.g.rotation.y = p.facing;
+  p.g.rotation.z = p.state === "down" ? Math.PI/2 : 0;
+  p.lamp.intensity = p.state === "down" ? 0.2 : 1.1;
+}
+function downPlayer(p, why){
+  if (p.state === "down") return;
+  p.state = "down"; p.reviveT = 0; p.vy = 0;
+  say(p, why, 4);
+  const other = p === karthi ? keerthi : karthi;
+  if (other.state === "ok") say(other, p.name + " is down! Stand close to revive.", 4);
+}
+
+/* ---------------------------------------------------------------
+   UPDATE
+---------------------------------------------------------------- */
+function update(dt){
+  time += dt;
+
+  for (const s of movers){
+    const mv = s.mv;
+    const c = mv.min + (mv.max-mv.min)*(Math.sin(time*mv.speed+mv.phase)+1)/2;
+    const dl = c - mv.c;
+    for (const p of players){
+      if (p.grounded && Math.abs(p.y - s.h) < 0.06 && p.x > s.x0 && p.x < s.x1 && p.z > s.z0 && p.z < s.z1){
+        if (mv.axis === "x") p.x += dl; else p.z += dl;
+      }
+    }
+    mv.c = c;
+    if (mv.axis === "x"){ s.x0 = c-mv.w/2; s.x1 = c+mv.w/2; s.m.position.x = c; }
+    else { s.z0 = c-mv.d/2; s.z1 = c+mv.d/2; s.m.position.z = c; }
+  }
+
+  for (const p of players){
+    const c = p.ctl;
+    if (p.state === "ok"){
+      let dx = 0, dz = 0;
+      if (keys[c.left]) dx -= 1;
+      if (keys[c.right]) dx += 1;
+      if (keys[c.up]) dz -= 1;
+      if (keys[c.down]) dz += 1;
+      if (dx || dz){
+        const len = Math.hypot(dx, dz); dx /= len; dz /= len;
+        const mx = dx * p.speed * dt, mz = dz * p.speed * dt;
+        if (!blocked(p, p.x + mx, p.z)) p.x += mx;
+        if (!blocked(p, p.x, p.z + mz)) p.z += mz;
+        const target = Math.atan2(-dx, -dz);
+        let d = target - p.facing;
+        while (d > Math.PI) d -= Math.PI*2;
+        while (d < -Math.PI) d += Math.PI*2;
+        p.facing += d * Math.min(1, dt*14);
+      }
+      if (justPressed[c.jump] && p.grounded){ p.vy = p.jump; p.grounded = false; }
+    }
+    // gravity
+    p.vy -= 26 * dt;
+    p.y += p.vy * dt;
+    const gh = groundHeight(p);
+    if (p.y <= gh){
+      if (gh > -50){ p.y = gh; p.vy = 0; p.grounded = true; }
+      else p.grounded = false;
+    } else p.grounded = false;
+    if (p.grounded && p.y > -1){
+      for (const z of cpZones){
+        if (p.x > z.x0 && p.x < z.x1 && p.z > z.z0 && p.z < z.z1){
+          p.checkpoint.x = z.cx + (p === keerthi ? 1.5 : -1.5); p.checkpoint.z = z.cz;
+        }
+      }
+    }
+    if (p.y < -9){
+      p.x = p.checkpoint.x; p.z = p.checkpoint.z; p.y = 0; p.vy = 0;
+      say(p, "You fell! Back to the edge.", 3);
+    }
+    syncPlayer(p);
+  }
+
+  // plates
+  for (const pl of plates){
+    pl.m.visible = !pl.disabled;
+    pl.on = !pl.disabled && players.some(p => p.state === "ok" && p.y < 1 && Math.hypot(p.x-pl.x, p.z-pl.z) < 1.7);
+    pl.m.position.y = pl.on ? 0.03 : 0.1;
+    pl.m.material.emissiveIntensity = pl.on ? 1.6 : 0.15;
+  }
+  // chapter-specific mechanics
+  if (door){
+    const open = plates.length === 2 && plates[0].on && plates[1].on;
+    if (open && !door.off) say(karthi, "The door grinds open!", 3), say(keerthi, "The door grinds open!", 3);
+    door.off = open || door.off;          // stays open once opened
+    door.m.visible = !door.off;
+  }
+  if (bridge){
+    const on = bridge.plates.some(i => plates[i] && plates[i].on);
+    // never remove bridge while someone is standing over the chasm
+    const overChasm = players.some(p => p.z < bridge.zhi + 1 && p.z > bridge.zlo - 1 && p.y > -1);
+    bridge.on = on || (bridge.on && overChasm);
+    bridge.m.visible = bridge.on;
+  }
+  // spikes
+  if (spikes.length){
+    const phase = Math.floor(time / 1.3);
+    for (const s of spikes){
+      const k = (phase + s.r + s.c) % 3;
+      s.active = k === 0;
+      s.warn = ((phase + 1 + s.r + s.c) % 3) === 0 && (time % 1.3) > 0.65;
+      s.sp.visible = s.active;
+      s.tile.material.color.setHex(s.active ? 0x7a1020 : s.warn ? 0xb85a10 : 0x3a1520);
+      if (s.active){
+        for (const p of players){
+          if (p.state === "ok" && p.y < 0.8 && Math.abs(p.x-s.x) < 1.8 && Math.abs(p.z-s.z) < 1.5)
+            downPlayer(p, "Spikes! Wait for your partner to revive you.");
+        }
+      }
+    }
+  }
+  // gates (open while a linked plate is held, or forced open)
+  for (const g of gates){
+    const near = players.some(p => p.state === "ok" && p.x > g.s.x0-1.5 && p.x < g.s.x1+1.5 && p.z > g.s.z0-1.5 && p.z < g.s.z1+1.5);
+    const on = g.forceOpen || g.plates.some(i => plates[i] && plates[i].on);
+    const was = g.open;
+    g.open = on || (g.open && near);
+    g.s.off = g.open; g.s.m.visible = !g.open;
+    if (g.open && !was) beep(300, 0.2);
+  }
+  // colour-order plate puzzle
+  if (seq && !seq.done){
+    plates.forEach((pl, i) => {
+      if (i > 3) return;
+      if (pl.on && !pl.prev){
+        if (i === seq.order[seq.pos]){
+          seq.pos++; beep(480 + seq.pos*120, 0.15);
+          if (seq.pos >= seq.order.length){
+            seq.done = true; beep(880, 0.3);
+            if (seq.gate) seq.gate.forceOpen = true;
+            say(karthi, "Correct! The way opens.", 3); say(keerthi, "Correct! The way opens.", 3);
+            if (seq.onDone) seq.onDone();
+          }
+        } else if (!(seq.pos > 0 && i === seq.order[seq.pos-1])){
+          seq.pos = 0; beep(150, 0.3);
+          say(karthi, "Wrong plate! Start again.", 2.5); say(keerthi, "Wrong plate! Start again.", 2.5);
+        }
+      }
+    });
+  }
+  plates.forEach(pl => { pl.prev = pl.on; });
+  updateHints();
+  // patrolling shadows
+  for (const h of hazards){
+    const u = (Math.sin(time*h.speed + h.phase) + 1) / 2;
+    h.x = h.ax + (h.bx-h.ax)*u; h.z = h.az + (h.bz-h.az)*u;
+    h.m.position.set(h.x, 0.06, h.z);
+    for (const p of players){
+      if (p.state === "ok" && p.y < 0.8 && Math.hypot(p.x-h.x, p.z-h.z) < h.r + 0.35)
+        downPlayer(p, "A shadow touched you!");
+    }
+  }
+  // final stand
+  if (finale && finale.phase === 2){
+    const a = plates[4].on, b = plates[5].on;
+    if (a && b){ finale.hold += dt; center("Hold together... " + Math.max(0, 3-finale.hold).toFixed(1)); }
+    else finale.hold = Math.max(0, finale.hold - dt*2);
+    if (finale.hold >= 3){
+      finale.hold = 0; finale.n++; beep(740, 0.25);
+      if (finale.n >= 3){
+        finale.phase = 3;
+        if (ghost){ levelGroup.remove(ghost.g); ghost = null; }
+        plates[4].disabled = true; plates[5].disabled = true;
+        portal.locked = false; portal.g.visible = true;
+        finale.light.intensity = 2.6;
+        say(karthi, "The Lamp awakens! Reach the light together.", 6); say(keerthi, "The Lamp awakens! Reach the light together.", 6);
+      } else {
+        const sp = finale.spots[finale.n];
+        [4,5].forEach((i, k) => { const pl = plates[i]; pl.x = sp[k][0]; pl.z = sp[k][1]; pl.m.position.x = pl.x; pl.m.position.z = pl.z; });
+        if (ghost){ ghost.speed += 0.6; ghost.grace = 2.5; }
+        say(karthi, "Round " + (finale.n+1) + " of 3. The plates moved!", 3.5); say(keerthi, "Round " + (finale.n+1) + " of 3. The plates moved!", 3.5);
+      }
+    }
+  }
+  // ghost
+  if (ghost) updateGhost(dt);
+
+  // revive
+  for (const p of players){
+    if (p.state !== "down") continue;
+    const o = p === karthi ? keerthi : karthi;
+    if (o.state === "ok" && Math.hypot(o.x-p.x, o.z-p.z) < 2.4){
+      p.reviveT += dt;
+      center("Reviving " + p.name + "... " + Math.min(100, Math.round(p.reviveT/2*100)) + "%");
+      if (p.reviveT >= 2){ p.state = "ok"; p.reviveT = 0; say(p, "Thank you, sister!", 3); center(""); }
+    } else { p.reviveT = 0; }
+  }
+  if (karthi.state === "down" && keerthi.state === "down"){
+    center("Both down! Restarting chapter...");
+    if (!updateGameOverTimer(dt)) return;
+  } else gameOverT = 0;
+
+  // sense (Keerthi)
+  if (senseCD > 0) senseCD -= dt;
+  if (senseT > 0) senseT -= dt;
+  if (justPressed[keerthi.ctl.power] && senseCD <= 0 && keerthi.state === "ok"){
+    senseT = 6; senseCD = 10;
+    say(keerthi, "You sense something hidden nearby...", 4);
+    const r = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.0, 48),
+      new THREE.MeshBasicMaterial({color:0xff6fb5, transparent:true, opacity:0.9, side:THREE.DoubleSide}));
+    r.rotation.x = -Math.PI/2; r.position.set(keerthi.x, 0.2, keerthi.z);
+    levelGroup.add(r); senseRing = {m:r, t:0};
+  }
+  if (senseRing){
+    senseRing.t += dt;
+    const s = 1 + senseRing.t * 16;
+    senseRing.m.scale.set(s, s, s);
+    senseRing.m.material.opacity = Math.max(0, 0.9 - senseRing.t * 1.1);
+    if (senseRing.t > 0.9){ levelGroup.remove(senseRing.m); senseRing = null; }
+  }
+
+  // clues
+  for (const c of clues){
+    if (c.got) continue;
+    if (c.hidden){
+      c.m.visible = senseT > 0 && Math.hypot(keerthi.x-c.x, keerthi.z-c.z) < 16;
+      if (!c.m.visible) continue;
+    }
+    c.m.rotation.y += dt*1.8;
+    c.m.position.y = 1.4 + Math.sin(time*2 + c.x)*0.18;
+    for (const p of players){
+      if (p.state === "ok" && Math.hypot(p.x-c.x, p.z-c.z) < 1.5){
+        c.got = true; c.m.visible = false; found.add(c.id);
+        story(CLUE_TEXT[c.id]); updateTop(); beep(660, 0.12); setTimeout(() => beep(990, 0.18), 120);
+        break;
+      }
+    }
+  }
+
+  // portal
+  if (portal && !portal.locked){
+    portal.ring.rotation.z += dt;
+    portal.core.material.opacity = 0.45 + Math.sin(time*3)*0.12;
+    const both = players.every(p => p.state === "ok" && Math.hypot(p.x-portal.x, p.z-portal.z) < 2.8);
+    if (both){
+      portalT += dt;
+      center("Hold on together... " + Math.round(Math.min(1, portalT/1.5)*100) + "%");
+      if (portalT >= 1.5){ center(""); nextChapter(); return; }
+    } else if (portalT > 0){ portalT = 0; center(""); }
+  }
+
+  // random unexpected events
+  nextEvent -= dt;
+  if (nextEvent <= 0){
+    nextEvent = 24 + rand()*20;
+    const r = Math.floor(rand()*3);
+    if (r === 0){ darkT = 4.5; say(karthi, "The lights suddenly go off!", 4); say(keerthi, "The lights suddenly go off!", 4); beep(110, 0.5); }
+    else if (r === 1){ shakeT = 1.2; say(karthi, "A door slams shut somewhere...", 3); say(keerthi, "A door slams shut somewhere...", 3); beep(80, 0.4); }
+    else if (chapter >= 2){
+      say(karthi,  "A voice whispers: \"Trust your sister.\"", 4);
+      say(keerthi, "A voice whispers: \"Don't trust Karthi.\"", 4);
+    } else { shakeT = 0.8; say(karthi, "The floorboards creak...", 3); say(keerthi, "Something moved behind you.", 3); }
+  }
+  if (darkT > 0) darkT -= dt;
+  if (shakeT > 0) shakeT -= dt;
+  const k = darkT > 0 ? 0.12 : 1;
+  ambient.intensity += ((ambient.userData.base * k) - ambient.intensity) * Math.min(1, dt*5);
+  scene.fog.density = ambient.userData.fog * (darkT > 0 ? 1.8 : 1);
+
+  // message timers
+  players.forEach(p => {
+    if (p.msgT > 0){ p.msgT -= dt; if (p.msgT <= 0) $(p === karthi ? "m1" : "m2").classList.remove("on"); }
+  });
+  if (storyT > 0){ storyT -= dt; if (storyT <= 0) $("story").classList.remove("on"); }
+}
+
+let gameOverT = 0;
+function updateGameOverTimer(dt){
+  gameOverT += dt;
+  if (gameOverT > 2.2){ gameOverT = 0; center(""); loadChapter(chapter); return false; }
+  return true;
+}
+
+function updateGhost(dt){
+  const gh = ghost;
+  gh.grace -= dt;
+  if (gh.grace > 0){ gh.g.visible = Math.floor(time*6)%2 === 0; return; }
+  gh.g.visible = true;
+  const alive = players.filter(p => p.state === "ok");
+  if (!alive.length) return;
+  if (gh.nearest){
+    let best = alive[0], bd = 1e9;
+    for (const p of alive){ const d = Math.hypot(p.x-gh.x, p.z-gh.z); if (d < bd){ bd = d; best = p; } }
+    gh.target = players.indexOf(best);
+  } else {
+    ghostTargetT -= dt;
+    if (ghostTargetT <= 0 || players[gh.target].state !== "ok"){
+      ghostTargetT = 15;
+      gh.target = alive.length === 2 ? Math.floor(rand()*2) : players.indexOf(alive[0]);
+      const tt = players[gh.target];
+      say(tt, "The ghost is hunting YOU!", 3);
+      const o = players[1 - gh.target];
+      if (o.state === "ok") say(o, "The ghost ignores you... it follows " + tt.name + ".", 3);
+    }
+  }
+  const t = players[gh.target];
+  const dx = t.x - gh.x, dz = t.z - gh.z, d = Math.hypot(dx, dz) || 1;
+  gh.x += dx/d * gh.speed * dt;
+  gh.z += dz/d * gh.speed * dt;
+  gh.g.position.set(gh.x, 0.4 + Math.sin(time*3)*0.25, gh.z);
+  gh.g.rotation.y = Math.atan2(dx, dz);
+  if (d < 1.3 && t.state === "ok"){
+    downPlayer(t, "The ghost caught you!");
+    gh.x -= dx/d * 6; gh.z -= dz/d * 6;
+    gh.grace = 3;
+  }
+}
+
+function nextChapter
+(){
+  if (chapter < CHAPTERS.length - 1){ grantChapter(chapter); loadChapter(chapter + 1); beep(440, 0.3); }
+  else endGame();
+}
+
+
+/* ---------------------------------------------------------------
+   AUDIO (tiny synth beeps, no files needed)
+---------------------------------------------------------------- */
+let actx = null;
+function beep(freq, dur){
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = freq; o.type = "triangle";
+    g.gain.setValueAtTime(0.08, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) {}
+}
+
+/* ---------------------------------------------------------------
+   RENDER
+---------------------------------------------------------------- */
+function render(){
+  const w = innerWidth, h = innerHeight, hw = Math.floor(w/2);
+  players.forEach((p, i) => {
+    const cam = p.cam;
+    cam.aspect = hw / h;
+    cam.updateProjectionMatrix();
+    const sx = shakeT > 0 ? (Math.random()-0.5)*0.5 : 0;
+    const sy = shakeT > 0 ? (Math.random()-0.5)*0.5 : 0;
+    cam.position.set(p.x + sx, 11 + sy, p.z + 12);
+    cam.lookAt(p.x, 1, p.z - 2);
+    renderer.setViewport(i*hw, 0, hw, h);
+    renderer.setScissor(i*hw, 0, hw, h);
+    renderer.render(scene, cam);
+  });
+}
+addEventListener("resize", () => renderer.setSize(innerWidth, innerHeight));
+
+
+/* ---------------------------------------------------------------
+   TOUCH CONTROLS (phone)
+---------------------------------------------------------------- */
+const isTouch = matchMedia("(pointer:coarse)").matches || ("ontouchstart" in window);
+if (isTouch){
+  document.body.classList.add("touch");
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.5));
+  renderer.setSize(innerWidth, innerHeight);
+}
+function setupStick(id, ctl){
+  const base = $(id), knob = base.firstElementChild; let pid = null;
+  const clear = () => { keys[ctl.left]=keys[ctl.right]=keys[ctl.up]=keys[ctl.down]=false; knob.style.transform="translate(-50%,-50%)"; };
+  const move = e => {
+    const r = base.getBoundingClientRect(), max = r.width/2;
+    let dx = e.clientX-(r.left+r.width/2), dy = e.clientY-(r.top+r.height/2);
+    const d = Math.hypot(dx, dy);
+    if (d > max){ dx *= max/d; dy *= max/d; }
+    knob.style.transform = "translate(calc(-50% + "+dx+"px), calc(-50% + "+dy+"px))";
+    const t = max*0.25;
+    keys[ctl.left]=dx<-t; keys[ctl.right]=dx>t; keys[ctl.up]=dy<-t; keys[ctl.down]=dy>t;
+  };
+  base.addEventListener("pointerdown", e => { pid=e.pointerId; base.setPointerCapture(pid); move(e); e.preventDefault(); });
+  base.addEventListener("pointermove", e => { if (e.pointerId===pid) move(e); });
+  const end = e => { if (e.pointerId===pid){ pid=null; clear(); } };
+  base.addEventListener("pointerup", end); base.addEventListener("pointercancel", end);
+}
+function setupButton(id, code){
+  const b = $(id); let pid = null;
+  b.addEventListener("pointerdown", e => {
+    pid = e.pointerId; b.setPointerCapture(pid);
+    if (!keys[code]) justPressed[code] = true;
+    keys[code] = true; e.preventDefault();
+  });
+  const end = e => { if (e.pointerId===pid){ pid=null; keys[code]=false; } };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+}
+setupStick("s1", karthi.ctl);  setupStick("s2", keerthi.ctl);
+setupButton("j1", karthi.ctl.jump); setupButton("j2", keerthi.ctl.jump);
+setupButton("sense", keerthi.ctl.power);
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+function goFullscreen(){
+  if (!isTouch) return;
+  try {
+    const el = document.documentElement;
+    const f = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (f) { const r = f.call(el); if (r && r.catch) r.catch(()=>{}); }
+    if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(()=>{});
+  } catch (e) {}
+}
+
+/* ---------------------------------------------------------------
+   STORY SCREENS, OUTFITS AND REWARDS
+---------------------------------------------------------------- */
+const INTROS = [
+  "The house is breathing. Somewhere inside, a locked door waits for two keys.",
+  "The village looks abandoned, but every door faces away from you, as if the people hid on purpose.",
+  "The forest has no moon, only mushrooms that glow. Something pale is following you.",
+  "Under the village lies a world carved by hands that loved your family.",
+  "Dust hangs in the throne hall. An empty throne waits for a ruler who must be two.",
+  "The lake is silent. It remembers everyone who crossed it beside someone they trusted.",
+  "The Lamp of Origin burns here, or it once did. The Shadow is waiting for you both."
+];
+
+const INTRO_PAGES = [
+  {title:"The Lost Bloodline", text:"Every family has a story it never tells.", bg:["#07040f","#2a1050"]},
+  {text:"Karthi and Keerthi are sisters. Tonight they stand in the hall of their grandmother's old house for the last time. Tomorrow, the house will be sold.", bg:["#0b0716","#3a1a5c"]},
+  {text:"In a dusty drawer, Keerthi finds a lantern with half a star carved into its side. Karthi finds the other half sewn into the lining of Grandmother's coat. The moment the two halves touch, every light in the house goes out.", bg:["#0a0614","#4a2570"]},
+  {text:"The walls begin to breathe. Doors that were never there creak open. And a voice that is not Grandmother's whispers from the dark: 'Finally. The bloodline walks again.'", bg:["#05030c","#52153a"]},
+  {text:"It is the Shadow, born long ago from the first lie two sisters told each other. It feeds on doubt. It will whisper to both of you, and it will never tell you the same thing.", bg:["#05030c","#2a0f3a"]},
+  {title:"Your journey begins", text:"Karthi runs faster and jumps farther. Keerthi senses what is hidden. Neither of you can finish this alone. Find the clues, trust each other, and carry the light home.", bg:["#07101c","#1d4a6a"]}
+];
+
+const ENDINGS = {
+  t: {
+    title: "True Ending: The Light Returns",
+    summary: "You found every clue. The whispers were the Shadow's, never your family's. The Lamp burns again and the bloodline is whole.",
+    pages: [
+      {title:"The Lamp of Origin", text:"The two halves of the star click together in both sisters' hands. The Lamp of Origin, cold for a hundred years, bursts into golden flame.", bg:["#1a1204","#7a5a10"]},
+      {text:"The Shadow rises one last time, and now you can see its shape: two little girls, quarrelling in the dark. The first sisters of your family. Their first lie became the Shadow's first breath.", bg:["#120a1c","#3a2060"]},
+      {text:"Karthi takes Keerthi's hand. 'We are not them,' they say together. The light does not destroy the Shadow. It forgives it. The two small figures hold hands, smile, and fade into the flame like a long goodbye.", bg:["#1a1204","#8a6a20"]},
+      {text:"Far beyond the hidden lake, the lost village wakes, safe at last. Grandmother's voice drifts through the sanctuary: 'I am proud of you both.'", bg:["#07101c","#2a6a8a"]},
+      {title:"The End", text:"At dawn the old house is only a house again. But in the family ledger, the blank page now holds two names, side by side. The house is not sold. The Lamp hangs in the hall and burns for every sister who comes after you. Every family has a story it never tells. Yours has finally been told.", bg:["#201408","#c8902a"]}
+    ]
+  },
+  h: {
+    title: "Half-Truth Ending",
+    summary: "The Lamp is lit, but pieces of the family story are still hidden. Replay to find every clue and the true ending.",
+    pages: [
+      {title:"The Lamp of Origin", text:"The Lamp catches, flickers, and holds. The Shadow shrinks back into the walls, quieter now, but not gone.", bg:["#1a1204","#6a4a10"]},
+      {text:"You never learned the whole truth. Some pages of the family story stayed hidden, and some faces in the lost village stay unnamed.", bg:["#120a1c","#3a2060"]},
+      {title:"The End?", text:"At dawn the house is quiet and the Lamp glows in the hall. Somewhere behind a locked door, more secrets wait for sisters who look a little closer.", bg:["#101018","#3a4a6a"]}
+    ]
+  },
+  l: {
+    title: "Lost Ending",
+    summary: "You rushed and missed most of the story. Go back, explore carefully and listen to each other, not the whispers.",
+    pages: [
+      {title:"The Lamp of Origin", text:"The Lamp coughs out a thin light and almost dies. You rushed, and the Shadow's whispers filled every gap you left behind.", bg:["#0a0610","#2a1030"]},
+      {text:"You and your sister escape the house, but the doubts follow you home, soft as footsteps behind you.", bg:["#05030c","#1a1030"]},
+      {title:"Try again", text:"The Lamp waits in the dark. Go back. Look carefully. Trust each other.", bg:["#05030c","#2a1a4a"]}
+    ]
+  }
+};
+
+const OUTFITS = [
+  {id:"classic",   name:"Classic",            req:"Always yours",             dress:null,     hair:null,     acc:"none",     glow:null,     unlock:null},
+  {id:"festival",  name:"Village Festival",   req:"Finish Chapter 2",         dress:0xff8a3d, hair:0x2a1408, acc:"backpack", bag:0xb5651d,  unlock:{chapter:1}},
+  {id:"ranger",    name:"Forest Ranger",      req:"Finish Chapter 3",         dress:0x2f8f4e, hair:0x20120a, acc:"cape",     cape:0x1f4a2c, unlock:{chapter:2}},
+  {id:"explorer",  name:"Cavern Explorer",    req:"Finish Chapter 4",         dress:0xb08a5a, hair:0x2b1a10, acc:"helmet",   unlock:{chapter:3}},
+  {id:"royal",     name:"Palace Royal",       req:"Finish Chapter 5",         dress:0x7a2cff, hair:0x1a0f10, acc:"crown",    unlock:{chapter:4}},
+  {id:"spirit",    name:"Lake Spirit",        req:"Finish Chapter 6",         dress:0x1fc8c8, hair:0x0e3a4a, acc:"wings",    glow:0x5ee7ff, unlock:{chapter:5}},
+  {id:"keeper",    name:"Lamp Keeper",        req:"Finish the game",          dress:0xffd66b, hair:0x3a2410, acc:"halo",     glow:0xffd66b, unlock:{chapter:6}},
+  {id:"starlight", name:"Starlight Guardian", req:"True ending: all 21 clues", dress:0xf4eaff, hair:0xfff2b0, acc:"cape",     cape:0x7b4bd6, glow:0xc77dff, unlock:{all:true}}
+];
+const outfitById = id => OUTFITS.find(o => o.id === id);
+let unlocked = new Set(["classic"]);
+let equip = {karthi:"classic", keerthi:"classic"};
+let newlyUnlocked = [];
+let uiMode = "menu";            // menu | cine | wardrobe | play | end
+let prevState = "menu";
+let toastT = null;
+
+function loadSave(){
+  try {
+    JSON.parse(localStorage.getItem("lb_unlocked") || "[]").forEach(id => { if (outfitById(id)) unlocked.add(id); });
+    const e = JSON.parse(localStorage.getItem("lb_equip") || "{}");
+    if (e.karthi  && unlocked.has(e.karthi))  equip.karthi  = e.karthi;
+    if (e.keerthi && unlocked.has(e.keerthi)) equip.keerthi = e.keerthi;
+  } catch (err) {}
+}
+function saveGame(){
+  try {
+    localStorage.setItem("lb_unlocked", JSON.stringify(Array.from(unlocked)));
+    localStorage.setItem("lb_equip", JSON.stringify(equip));
+  } catch (err) {}
+}
+function toast(text){
+  const t = $("toast"); t.textContent = text; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 6000);
+}
+function unlockOutfit(id){
+  if (unlocked.has(id)) return;
+  unlocked.add(id); newlyUnlocked.push(outfitById(id).name); saveGame();
+  toast("New outfit unlocked: " + outfitById(id).name + ". Tap Outfits to wear it!");
+  beep(880, 0.2);
+}
+function grantChapter(ch){
+  OUTFITS.forEach(o => { if (o.unlock && o.unlock.chapter === ch) unlockOutfit(o.id); });
+}
+
+/* ---- put an outfit on a 3D character ---- */
+function applyOutfit(p, id){
+  const o = outfitById(id) || OUTFITS[0];
+  p.body.material.color.setHex(o.dress != null ? o.dress : p.color);
+  p.body.material.emissive.setHex(o.glow != null ? o.glow : 0x000000);
+  p.body.material.emissiveIntensity = o.glow != null ? 0.35 : 0;
+  p.hair.material.color.setHex(o.hair != null ? o.hair : 0x1a0f10);
+  p.lamp.color.setHex(o.glow != null ? o.glow : p.color);
+  while (p.accGroup.children.length) p.accGroup.remove(p.accGroup.children[0]);
+  const gold = mat(0xffd66b, {emissive:0xaa7700, emissiveIntensity:0.8, roughness:0.3, side:THREE.DoubleSide});
+  const A = p.accGroup;
+  if (o.acc === "cape"){
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.4, 0.07), mat(o.cape || 0x225533, {side:THREE.DoubleSide}));
+    m.position.set(0, 0.95, 0.52); m.rotation.x = -0.12; A.add(m);
+  } else if (o.acc === "crown"){
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.3, 0.22, 10, 1, true), gold);
+    ring.position.y = 2.22; A.add(ring);
+    for (let i = 0; i < 6; i++){
+      const a = i/6*Math.PI*2;
+      const c = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.22, 6), gold);
+      c.position.set(Math.cos(a)*0.33, 2.42, Math.sin(a)*0.33); A.add(c);
+    }
+  } else if (o.acc === "backpack"){
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.8, 0.32), mat(o.bag || 0xb5651d));
+    m.position.set(0, 1.05, 0.5); A.add(m);
+  } else if (o.acc === "wings"){
+    const wm = new THREE.MeshBasicMaterial({color:o.glow || 0x5ee7ff, transparent:true, opacity:0.6, side:THREE.DoubleSide});
+    [-1, 1].forEach(s => {
+      const w = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.3), wm);
+      w.position.set(s*0.75, 1.2, 0.35); w.rotation.y = s*0.7; A.add(w);
+    });
+  } else if (o.acc === "halo"){
+    const h = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.05, 8, 28), gold);
+    h.position.y = 2.55; h.rotation.x = Math.PI/2; A.add(h);
+  } else if (o.acc === "helmet"){
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.49, 14, 10, 0, Math.PI*2, 0, Math.PI/2), mat(0xffcc33, {roughness:0.4}));
+    h.position.y = 1.9; A.add(h);
+  }
+}
+
+/* ---- wardrobe screen ---- */
+function hexc(n){ return "#" + n.toString(16).padStart(6, "0"); }
+function avatarSVG(o, base){
+  const dress = hexc(o.dress != null ? o.dress : base), hair = hexc(o.hair != null ? o.hair : 0x1a0f10);
+  const glow = o.glow != null ? hexc(o.glow) : null, gold = "#ffd66b";
+  let back = "", front = "";
+  if (o.acc === "cape") back = '<path d="M18 36 L42 36 L48 74 L12 74 Z" fill="' + hexc(o.cape || 0x225533) + '"/>';
+  if (o.acc === "wings") back = '<path d="M30 40 L2 24 L8 56 Z M30 40 L58 24 L52 56 Z" fill="' + (glow || "#5ee7ff") + '" opacity=".6"/>';
+  if (o.acc === "backpack") back = '<rect x="38" y="38" width="12" height="20" rx="3" fill="' + hexc(o.bag || 0xb5651d) + '"/>';
+  if (o.acc === "crown") front = '<path d="M21 14 L24 5 L27 11 L30 3 L33 11 L36 5 L39 14 Z" fill="' + gold + '"/>';
+  if (o.acc === "halo") front = '<ellipse cx="30" cy="8" rx="10" ry="3" fill="none" stroke="' + gold + '" stroke-width="2.5"/>';
+  if (o.acc === "helmet") front = '<path d="M18 22 A12 12 0 0 1 42 22 Z" fill="#ffcc33"/>';
+  const style = glow ? ' style="filter:drop-shadow(0 0 5px ' + glow + ')"' : "";
+  return '<svg viewBox="0 0 60 80" width="54" height="72"' + style + '>' + back +
+    '<path d="M20 38 L40 38 L46 74 L14 74 Z" fill="' + dress + '"/>' +
+    '<circle cx="30" cy="26" r="11" fill="#ffe0c8"/>' +
+    '<path d="M19 27 A11 11 0 0 1 41 27 Q30 16 19 27 Z" fill="' + hair + '"/>' + front + '</svg>';
+}
+function renderWardrobe(){
+  const root = $("wCols"); root.innerHTML = "";
+  [["karthi", karthi, "Karthi"], ["keerthi", keerthi, "Keerthi"]].forEach(entry => {
+    const key = entry[0], p = entry[1];
+    const col = document.createElement("div"); col.className = "wcol";
+    const h = document.createElement("h3"); h.className = key; h.textContent = entry[2]; col.appendChild(h);
+    const grid = document.createElement("div"); grid.className = "wgrid";
+    OUTFITS.forEach(o => {
+      const ok = unlocked.has(o.id), on = equip[key] === o.id;
+      const card = document.createElement("button");
+      card.className = "wcard" + (on ? " sel" : "") + (ok ? "" : " lock");
+      card.innerHTML = avatarSVG(o, p.color) + '<span class="wn">' + o.name + '</span><span class="wr">' +
+        (ok ? (on ? "Wearing" : "Tap to wear") : "Locked: " + o.req) + '</span>';
+      card.addEventListener("click", () => {
+        if (!ok) { toast("Locked: " + o.req); return; }
+        equip[key] = o.id; applyOutfit(p, o.id); saveGame(); renderWardrobe();
+      });
+      grid.appendChild(card);
+    });
+    col.appendChild(grid); root.appendChild(col);
+  });
+}
+function openWardrobe(){
+  if (uiMode === "wardrobe" || uiMode === "cine") return;
+  for (const k in keys) keys[k] = false;
+  prevState = state; if (state === "play") state = "paused";
+  uiMode = prevState === "play" ? "wardrobe" : "wardrobe";
+  renderWardrobe(); $("wardrobe").classList.add("on");
+}
+function closeWardrobe(){
+  $("wardrobe").classList.remove("on");
+  state = prevState;
+  uiMode = state === "play" ? "play" : (state === "end" ? "end" : "menu");
+}
+
+/* ---- story screens ---- */
+let cine = null;
+function playCine(pages, done){
+  cine = {pages, i:0, done, timer:null, typing:false, full:""};
+  uiMode = "cine";
+  $("overlay").classList.remove("on");
+  $("cine").classList.add("on");
+  cineShow();
+}
+function cineShow(){
+  const pg = cine.pages[cine.i];
+  $("cine").style.background = "radial-gradient(ellipse at 50% 30%," + pg.bg[1] + "," + pg.bg[0] + ")";
+  $("cTitle").textContent = pg.title || "";
+  $("cDots").textContent = cine.pages.map((_, k) => k === cine.i ? "\u25CF" : "\u25CB").join(" ");
+  $("cHint").textContent = cine.i === cine.pages.length - 1 ? "Tap or press Enter to continue" : "Tap or press Enter for next";
+  cine.full = pg.text; cine.typing = true;
+  $("cText").textContent = "";
+  clearInterval(cine.timer);
+  let n = 0;
+  cine.timer = setInterval(() => {
+    n += 2; $("cText").textContent = cine.full.slice(0, n);
+    if (n >= cine.full.length){ clearInterval(cine.timer); cine.typing = false; }
+  }, 28);
+}
+function cineNext(){
+  if (!cine) return;
+  if (cine.typing){ clearInterval(cine.timer); $("cText").textContent = cine.full; cine.typing = false; return; }
+  cine.i++;
+  if (cine.i >= cine.pages.length) cineEnd(); else cineShow();
+}
+function cineEnd(){
+  clearInterval(cine.timer);
+  const d = cine.done; cine = null;
+  $("cine").classList.remove("on");
+  if (d) d();
+}
+$("cine").addEventListener("click", cineNext);
+$("cSkip").addEventListener("click", e => { e.stopPropagation(); if (cine){ cine.i = cine.pages.length; cineEnd(); } });
+
+function beginIntro(){
+  goFullscreen();
+  playCine(INTRO_PAGES, startGame);
+}
+function onStart(){
+  if (uiMode === "end") startGame(); else beginIntro();
+}
+function showResults(info, n){
+  uiMode = "end";
+  const ov = $("overlay");
+  ov.querySelector("h1").textContent = info.title;
+  ov.querySelector(".sub").textContent = "Clues found: " + n + " of " + CLUE_TEXT.length;
+  $("oText").textContent = info.summary;
+  ov.querySelector(".keys").style.display = "none";
+  $("oRewards").innerHTML = newlyUnlocked.length
+    ? "New outfits unlocked: <b>" + newlyUnlocked.join(", ") + "</b>"
+    : "Outfits unlocked: " + unlocked.size + " of " + OUTFITS.length;
+  $("startBtn").textContent = "Play again";
+  ov.classList.add("on");
+}
+function endGame(){
+  state = "end"; uiMode = "cine";
+  seq = null; updateHints(); center("");
+  const n = found.size;
+  const kind = n === CLUE_TEXT.length ? "t" : n >= 12 ? "h" : "l";
+  grantChapter(6);
+  if (kind === "t") unlockOutfit("starlight");
+  const info = ENDINGS[kind];
+  playCine(info.pages, () => showResults(info, n));
+}
+addEventListener("touchstart", () => document.body.classList.add("touch"), {once:true, passive:true});
+$("wbtn").addEventListener("click", openWardrobe);
+$("outfitBtn").addEventListener("click", openWardrobe);
+$("wDone").addEventListener("click", closeWardrobe);
+
+/* ---------------------------------------------------------------
+   MAIN LOOP / START
+---------------------------------------------------------------- */
+let last = performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - last)/1000);
+  last = now;
+  if (state === "play") frame(dt);
+  render();
+  for (const k in justPressed) delete justPressed[k];
+}
+
+function startGame(){
+  goFullscreen();
+  found = new Set();
+  $("overlay").classList.remove("on");
+  state = "play"; uiMode = "play"; newlyUnlocked = [];
+  $("cine").classList.remove("on"); $("wardrobe").classList.remove("on");
+  beep(520, 0.2);
+  loadChapter(0);
+  say(karthi,  "Find the clues. Stay close to Keerthi.", 5);
+  say(keerthi, "Find the clues. Stay close to Karthi.", 5);
+}
+$("startBtn").addEventListener("click", onStart);
+addEventListener("keydown", e => {
+  if (uiMode === "wardrobe"){ if (e.code === "Escape" || e.code === "Enter"){ e.preventDefault(); closeWardrobe(); } return; }
+  if (e.code === "Escape" && state === "play"){ openWardrobe(); return; }
+  if ((e.code === "Enter" || e.code === "Space") && uiMode === "cine"){ e.preventDefault(); cineNext(); return; }
+  if (e.code === "Enter" && $("overlay").classList.contains("on")){ e.preventDefault(); onStart(); }
+});
+
+loadSave();
+applyOutfit(karthi, equip.karthi);
+applyOutfit(keerthi, equip.keerthi);
+setMood(0x120a1c, 0.02, 0xa08ad8, 0.6);
+buildHouse();                         // backdrop behind the menu
+players.forEach((p, i) => { p.x = i ? 3 : -3; p.z = 15; syncPlayer(p); });
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
